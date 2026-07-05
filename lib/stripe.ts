@@ -6,6 +6,7 @@ import {
   hasStripeCheckoutEnv,
   missingStripeCheckoutEnvKeys,
 } from "@/lib/env";
+import { log } from "@/lib/logger";
 import { getPrisma } from "@/lib/prisma";
 
 export type PreorderOfferSlug = "livre-bonus";
@@ -70,40 +71,65 @@ export async function createPreorderCheckoutSession(input: {
   offerSlug: PreorderOfferSlug;
   quantity: number;
 }) {
-  if (!hasStripeCheckoutEnv) {
-    throw new Error(
-      `Configuration Stripe incomplete: ${missingStripeCheckoutEnvKeys.join(
-        ", ",
-      )}`,
-    );
-  }
+  try {
+    if (!hasStripeCheckoutEnv) {
+      log.error("Configuration Stripe incomplète", {
+        missing: missingStripeCheckoutEnvKeys,
+      });
+      throw new Error(
+        `Configuration Stripe incomplete: ${missingStripeCheckoutEnvKeys.join(
+          ", ",
+        )}`,
+      );
+    }
 
-  const stripeClient = getStripeClient();
-  const priceId = getStripePriceIdForOffer(input.offerSlug);
-  const metadata = buildPreorderCheckoutMetadata(input);
+    const stripeClient = getStripeClient();
+    const priceId = getStripePriceIdForOffer(input.offerSlug);
+    const metadata = buildPreorderCheckoutMetadata(input);
 
-  const session = await stripeClient.checkout.sessions.create({
-    mode: "payment",
-    customer_email: input.email,
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/#precommande`,
-    line_items: [
-      {
-        price: priceId,
-        quantity: input.quantity,
-      },
-    ],
-    metadata,
-    payment_intent_data: {
+    log.debug("Création de session Stripe", {
+      orderId: input.orderId,
+      quantity: input.quantity,
+      email: input.email,
+    });
+
+    const session = await stripeClient.checkout.sessions.create({
+      mode: "payment",
+      customer_email: input.email,
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/#precommande`,
+      line_items: [
+        {
+          price: priceId,
+          quantity: input.quantity,
+        },
+      ],
       metadata,
-    },
-  });
+      payment_intent_data: {
+        metadata,
+      },
+    });
 
-  if (!session.url) {
-    throw new Error("Stripe n'a pas retourne d'URL de checkout.");
+    if (!session.url) {
+      log.error("URL de checkout manquante de Stripe", {
+        sessionId: session.id,
+      });
+      throw new Error("Stripe n'a pas retourné d'URL de checkout.");
+    }
+
+    log.info("Session Stripe créée avec succès", {
+      orderId: input.orderId,
+      sessionId: session.id,
+    });
+
+    return session;
+  } catch (error) {
+    log.error("Erreur lors de la création de la session Stripe", {
+      orderId: input.orderId,
+      error: error instanceof Error ? error.message : error,
+    });
+    throw error;
   }
-
-  return session;
 }
 
 type StripeMetadata = Record<string, string> | null | undefined;
@@ -117,77 +143,105 @@ async function confirmPaidOrderFromMetadata(
   externalPaymentId: string,
   checkoutSessionId?: string,
 ) {
-  const orderId = getMetadataOrderId(metadata);
+  try {
+    const orderId = getMetadataOrderId(metadata);
 
-  if (!orderId) {
-    return;
-  }
-
-  const prisma = getPrisma();
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-  });
-
-  if (!order || order.paymentStatus === "PAID") {
-    return;
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: order.id },
-      data: {
-        paymentStatus: "PAID",
-        status: "PREORDER_CONFIRMED",
-        paidAt: new Date(),
-        polarOrderId: externalPaymentId,
-        polarCheckoutId: checkoutSessionId ?? externalPaymentId,
-      },
-    });
-
-    await tx.orderStatusHistory.create({
-      data: {
-        orderId: order.id,
-        fromStatus: order.status,
-        toStatus: "PREORDER_CONFIRMED",
-        note: "Paiement confirme par webhook Stripe",
-      },
-    });
-  });
-
-  await sendPreorderConfirmationEmail({
-    to: order.email,
-    firstName: order.firstName,
-    orderId: order.id,
-  });
-}
-
-export async function handleStripeEvent(event: Stripe.Event) {
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-
-    if (session.payment_status !== "paid") {
+    if (!orderId) {
+      log.warn("Pas d'orderId trouvé dans les metadata Stripe", { metadata });
       return;
     }
 
-    const paymentIntentId =
-      typeof session.payment_intent === "string"
-        ? session.payment_intent
-        : (session.payment_intent?.id ?? event.id);
+    const prisma = getPrisma();
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
 
-    await confirmPaidOrderFromMetadata(
-      session.metadata,
-      paymentIntentId,
-      session.id,
-    );
-    return;
+    if (!order) {
+      log.error("Commande non trouvée", { orderId });
+      return;
+    }
+
+    if (order.paymentStatus === "PAID") {
+      log.info("Commande déjà payée", { orderId });
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          paymentStatus: "PAID",
+          status: "PREORDER_CONFIRMED",
+          paidAt: new Date(),
+          polarOrderId: externalPaymentId,
+          polarCheckoutId: checkoutSessionId ?? externalPaymentId,
+        },
+      });
+
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: order.id,
+          fromStatus: order.status,
+          toStatus: "PREORDER_CONFIRMED",
+          note: "Paiement confirmé par webhook Stripe",
+        },
+      });
+    });
+
+    log.info("Commande confirmée après paiement", { orderId });
+
+    await sendPreorderConfirmationEmail({
+      to: order.email,
+      firstName: order.firstName,
+      orderId: order.id,
+    });
+  } catch (error) {
+    log.error("Erreur lors de la confirmation du paiement", {
+      error: error instanceof Error ? error.message : error,
+    });
+    throw error;
   }
+}
 
-  if (event.type === "payment_intent.succeeded") {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+export async function handleStripeEvent(event: Stripe.Event) {
+  try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
 
-    await confirmPaidOrderFromMetadata(
-      paymentIntent.metadata,
-      paymentIntent.id,
-    );
+      if (session.payment_status !== "paid") {
+        log.debug("Session non payée, ignorée", {
+          sessionId: session.id,
+          paymentStatus: session.payment_status,
+        });
+        return;
+      }
+
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : (session.payment_intent?.id ?? event.id);
+
+      await confirmPaidOrderFromMetadata(
+        session.metadata,
+        paymentIntentId,
+        session.id,
+      );
+      return;
+    }
+
+    if (event.type === "payment_intent.succeeded") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+      await confirmPaidOrderFromMetadata(
+        paymentIntent.metadata,
+        paymentIntent.id,
+      );
+    }
+  } catch (error) {
+    log.error("Erreur lors du traitement de l'événement Stripe", {
+      eventType: event.type,
+      error: error instanceof Error ? error.message : error,
+    });
+    throw error;
   }
 }

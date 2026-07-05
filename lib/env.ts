@@ -2,16 +2,16 @@ import { z } from "zod";
 
 const serverSchema = z.object({
   DATABASE_URL: z.string().min(1),
-  NEXT_PUBLIC_APP_URL: z.string().url(),
+  NEXT_PUBLIC_APP_URL: z.url(),
   BETTER_AUTH_SECRET: z.string().min(32),
-  BETTER_AUTH_URL: z.string().url(),
+  BETTER_AUTH_URL: z.url(),
   STRIPE_SECRET_KEY: z.string().optional().default(""),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default(""),
   STRIPE_PRICE_BOOK_SINGLE: z.string().optional().default(""),
   STRIPE_PRICE_BOOK_BONUS: z.string().optional().default(""),
   STRIPE_PRICE_BOOK_PACK: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default(""),
-  RESEND_API_KEY: z.string().optional().default(""),
+  USESEND_API_KEY: z.string().optional().default(""),
 });
 
 const parsedServerEnv = serverSchema.safeParse(process.env);
@@ -59,7 +59,7 @@ export const env = parsedServerEnv.success
       STRIPE_PRICE_BOOK_BONUS: process.env.STRIPE_PRICE_BOOK_BONUS ?? "",
       STRIPE_PRICE_BOOK_PACK: process.env.STRIPE_PRICE_BOOK_PACK ?? "",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "",
-      RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
+      USESEND_API_KEY: process.env.USESEND_API_KEY ?? "",
     };
 
 function isMissing(value: string) {

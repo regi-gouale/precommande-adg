@@ -5,6 +5,7 @@ import {
   IconShield,
 } from "@tabler/icons-react";
 import { createPreorderCheckout } from "@/app/actions/preorder";
+import { PreorderForm } from "@/components/preorder-form";
 import { hasPreorderEnv, missingPreorderEnvKeys } from "@/lib/env";
 
 const perks = [
@@ -90,152 +91,11 @@ export function PreorderSection() {
           </div>
 
           {/* Right: form */}
-          <form action={createPreorderCheckout} className="flex flex-col gap-4">
-            {!isCheckoutConfigured ? (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                Configuration serveur incomplète. Variables manquantes:{" "}
-                {missingPreorderEnvKeys.join(", ")}
-              </p>
-            ) : null}
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="firstName"
-                  className="text-xs font-medium text-muted-foreground"
-                >
-                  Prénom *
-                </label>
-                <input
-                  id="firstName"
-                  className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                  name="firstName"
-                  placeholder="Jean"
-                  required
-                  disabled={!isCheckoutConfigured}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="lastName"
-                  className="text-xs font-medium text-muted-foreground"
-                >
-                  Nom *
-                </label>
-                <input
-                  id="lastName"
-                  className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                  name="lastName"
-                  placeholder="Dupont"
-                  required
-                  disabled={!isCheckoutConfigured}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="email"
-                className="text-xs font-medium text-muted-foreground"
-              >
-                Adresse e-mail *
-              </label>
-              <input
-                id="email"
-                className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                name="email"
-                placeholder="jean@exemple.fr"
-                type="email"
-                required
-                disabled={!isCheckoutConfigured}
-              />
-              <p className="text-xs text-muted-foreground">
-                Vous recevrez votre chapitre 1 PDF à cette adresse
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="phone"
-                className="text-xs font-medium text-muted-foreground"
-              >
-                Téléphone (optionnel)
-              </label>
-              <input
-                id="phone"
-                className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                name="phone"
-                placeholder="+33 6 12 34 56 78"
-                disabled={!isCheckoutConfigured}
-              />
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="offerSlug"
-                  className="text-xs font-medium text-muted-foreground"
-                >
-                  Offre
-                </label>
-                <input
-                  id="offerSlug"
-                  className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                  value="Livre + bonus"
-                  readOnly
-                  disabled={!isCheckoutConfigured}
-                />
-                <input type="hidden" name="offerSlug" value="livre-bonus" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="quantity"
-                  className="text-xs font-medium text-muted-foreground"
-                >
-                  Quantité *
-                </label>
-                <input
-                  id="quantity"
-                  className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                  name="quantity"
-                  type="number"
-                  min={1}
-                  defaultValue={1}
-                  required
-                  disabled={!isCheckoutConfigured}
-                />
-              </div>
-            </div>
-
-            <label className="flex items-start gap-2.5 text-sm text-muted-foreground">
-              <input
-                name="cgvAccepted"
-                type="checkbox"
-                className="mt-0.5 size-4 accent-gold"
-                required
-                disabled={!isCheckoutConfigured}
-              />
-              <span>
-                J&apos;accepte les{" "}
-                <span className="underline underline-offset-2">CGV</span> et
-                confirme que je retirerai mon exemplaire à la Cité Royale lors
-                du Camp Impact Conférence.
-              </span>
-            </label>
-
-            <button
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3.5 text-sm font-semibold text-gold-foreground shadow-lg shadow-gold/20 transition-all hover:bg-gold/90 disabled:opacity-50"
-              type="submit"
-              disabled={!isCheckoutConfigured}
-            >
-              <IconLock className="size-4" aria-hidden="true" />
-              Je précommande mon exemplaire dédicacé
-            </button>
-
-            <p className="text-center text-xs text-muted-foreground">
-              Paiement sécurisé — Prix fixé à 20 €, aucune surprise
-            </p>
-          </form>
+          <PreorderForm
+            isCheckoutConfigured={isCheckoutConfigured}
+            missingKeys={missingPreorderEnvKeys}
+            onSubmit={createPreorderCheckout}
+          />
         </div>
       </div>
     </section>
