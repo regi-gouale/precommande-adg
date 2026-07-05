@@ -38,7 +38,15 @@ export function getStripePriceIdForOffer(offerSlug: PreorderOfferSlug) {
     throw new Error("Offre de precommande invalide.");
   }
 
-  return env.STRIPE_PRICE_BOOK_BONUS;
+  const priceId = env.STRIPE_PRICE_BOOK_BONUS;
+
+  if (!priceId.startsWith("price_")) {
+    throw new Error(
+      "STRIPE_PRICE_BOOK_BONUS doit contenir un Price ID Stripe (prefixe price_), pas un Product ID (prod_).",
+    );
+  }
+
+  return priceId;
 }
 
 export function buildPreorderCheckoutMetadata(input: {
