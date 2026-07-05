@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,44 +36,48 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+
+  @@map("user")
 }
 
 model Session {
-  id            String    @id
-  expiresAt     DateTime
-  token         String    @unique
-  createdAt     DateTime
-  updatedAt     DateTime
-  ipAddress     String?
-  userAgent     String?
+  id             String   @id
+  expiresAt      DateTime
+  token          String   @unique
+  createdAt      DateTime
+  updatedAt      DateTime
+  ipAddress      String?
+  userAgent      String?
   impersonatedBy String?
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("session")
 }
 
 model Account {
-  id                   String    @id
-  accountId            String
-  providerId           String
-  userId               String
-  accessToken          String?
-  refreshToken         String?
-  idToken              String?
-  accessTokenExpiresAt DateTime?
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope                String?
-  password             String?
-  createdAt            DateTime
-  updatedAt            DateTime
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("account")
 }
 
 model Verification {
-  id         String   @id
+  id         String    @id
   identifier String
   value      String
   expiresAt  DateTime
@@ -80,10 +85,11 @@ model Verification {
   updatedAt  DateTime?
 
   @@index([identifier])
+  @@map("verification")
 }
 
 model Order {
-  id               String          @id @default(cuid())
+  id               String               @id @default(cuid())
   firstName        String
   lastName         String
   email            String
@@ -92,16 +98,16 @@ model Order {
   quantity         Int
   offerSlug        String
   cgvAccepted      Boolean
-  status           OrderStatus     @default(PENDING_PAYMENT)
-  paymentStatus    PaymentStatus   @default(PENDING)
+  status           OrderStatus          @default(PENDING_PAYMENT)
+  paymentStatus    PaymentStatus        @default(PENDING)
   paidAt           DateTime?
   polarOrderId     String?
   polarCheckoutId  String?
-  polarReferenceId String?         @unique
+  polarReferenceId String?              @unique
   amountCents      Int?
   currency         String?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   statusHistory    OrderStatusHistory[]
 
   @@index([email])
@@ -112,13 +118,13 @@ model Order {
 }
 
 model OrderStatusHistory {
-  id         String      @id @default(cuid())
+  id         String       @id @default(cuid())
   orderId    String
   fromStatus OrderStatus?
   toStatus   OrderStatus
   note       String?
-  createdAt  DateTime    @default(now())
-  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt  DateTime     @default(now())
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId, createdAt])
 }

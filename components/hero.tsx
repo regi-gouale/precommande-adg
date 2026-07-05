@@ -1,4 +1,4 @@
-import { IconStar } from "@tabler/icons-react";
+import { IconLock, IconStar } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -43,16 +43,29 @@ export function Hero() {
               className={buttonVariants({
                 size: "lg",
                 className:
-                  "bg-gold px-8 text-base font-medium text-gold-foreground hover:bg-gold/90",
+                  "bg-gold px-8 text-base font-semibold text-gold-foreground hover:bg-gold/90 shadow-lg shadow-gold/20",
               })}
             >
-              Je précommande
+              Je précommande — 20 €
             </Link>
-            <div className="text-sm text-muted-foreground">
-              <span className="font-serif text-2xl text-foreground">
-                20,00 €
-              </span>
-            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 md:justify-start">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <IconLock
+                className="size-3.5 text-green-500"
+                aria-hidden="true"
+              />
+              Paiement sécurisé
+            </span>
+            <span className="text-xs text-muted-foreground/40">•</span>
+            <span className="text-xs text-muted-foreground">
+              Exemplaire dédicacé exclusif
+            </span>
+            <span className="text-xs text-muted-foreground/40">•</span>
+            <span className="text-xs text-muted-foreground">
+              Chapitre 1 offert immédiatement
+            </span>
           </div>
         </div>
 

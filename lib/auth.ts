@@ -1,52 +1,61 @@
 import { checkout, polar, portal, webhooks } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
 
 import { sendPreorderConfirmationEmail } from "@/lib/email";
-import { requireServerEnv } from "@/lib/env";
+import { env, hasServerEnv } from "@/lib/env";
 import { getPrisma } from "@/lib/prisma";
 
-function createAuth() {
-  const env = requireServerEnv();
-  const prisma = getPrisma();
-  const polarClient = new Polar({
-    accessToken: env.POLAR_ACCESS_TOKEN,
-    server: env.POLAR_ENVIRONMENT,
+const globalForAuthPrisma = globalThis as unknown as {
+  authPrisma: PrismaClient | undefined;
+};
+
+function getAuthPrisma() {
+  if (hasServerEnv) {
+    return getPrisma();
+  }
+
+  if (globalForAuthPrisma.authPrisma) {
+    return globalForAuthPrisma.authPrisma;
+  }
+
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 
-  return betterAuth({
-    appName: "Precommande ADG",
-    baseURL: env.BETTER_AUTH_URL,
-    basePath: "/api/auth",
-    secret: env.BETTER_AUTH_SECRET,
-    database: prismaAdapter(prisma, {
-      provider: "postgresql",
-    }),
-    emailAndPassword: {
-      enabled: true,
-      disableSignUp: true,
-      minPasswordLength: 8,
-    },
-    session: {
-      expiresIn: 60 * 60 * 24 * 7,
-      updateAge: 60 * 60 * 24,
-      cookieCache: {
-        enabled: true,
-        maxAge: 60 * 5,
-      },
-    },
-    plugins: [
-      nextCookies(),
-      admin({
-        defaultRole: "USER",
-        adminRoles: ["ADMIN"],
-      }),
-      polar({
-        client: polarClient,
+  if (process.env.NODE_ENV !== "production") {
+    globalForAuthPrisma.authPrisma = prisma;
+  }
+
+  return prisma;
+}
+
+function createAuth() {
+  const prisma = getAuthPrisma();
+
+  const hasPolarConfig =
+    env.POLAR_ACCESS_TOKEN.length > 0 &&
+    env.POLAR_WEBHOOK_SECRET.length > 0 &&
+    env.POLAR_PRODUCT_BOOK_SINGLE.length > 0 &&
+    env.POLAR_PRODUCT_BOOK_BONUS.length > 0 &&
+    env.POLAR_PRODUCT_BOOK_PACK.length > 0;
+
+  const polarPlugin = hasPolarConfig
+    ? polar({
+        client: new Polar({
+          accessToken: env.POLAR_ACCESS_TOKEN,
+          server: env.POLAR_ENVIRONMENT as "sandbox" | "production",
+        }),
         createCustomerOnSignUp: true,
         use: [
           checkout({
@@ -84,7 +93,38 @@ function createAuth() {
             },
           }),
         ],
+      })
+    : null;
+
+  return betterAuth({
+    appName: "Precommande ADG",
+    baseURL: env.BETTER_AUTH_URL,
+    basePath: "/api/auth",
+    secret: env.BETTER_AUTH_SECRET,
+    database: prismaAdapter(prisma, {
+      provider: "postgresql",
+    }),
+    emailAndPassword: {
+      enabled: true,
+      disableSignUp: true,
+      minPasswordLength: 8,
+    },
+    session: {
+      expiresIn: 60 * 60 * 24 * 7,
+      updateAge: 60 * 60 * 24,
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 5,
+      },
+    },
+    plugins: [
+      admin({
+        defaultRole: "USER",
+        adminRoles: ["ADMIN"],
       }),
+      ...(polarPlugin ? [polarPlugin] : []),
+      // Must be the last plugin according to better-auth Next.js integration docs.
+      nextCookies(),
     ],
   });
 }
@@ -92,6 +132,21 @@ function createAuth() {
 type AuthInstance = ReturnType<typeof createAuth>;
 
 let authInstance: AuthInstance | undefined;
+
+function getOrCreateAuth(): AuthInstance {
+  if (!authInstance) {
+    authInstance = createAuth();
+  }
+
+  return authInstance;
+}
+
+// better-auth CLI expects an exported variable named `auth`.
+export const auth: AuthInstance = new Proxy({} as AuthInstance, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getOrCreateAuth(), prop, receiver);
+  },
+});
 
 type PolarPayload = {
   type?: string;
@@ -120,7 +175,7 @@ function buildEventKey(payload: PolarPayload) {
 }
 
 async function logPolarEvent(payload: PolarPayload) {
-  const prisma = getPrisma();
+  const prisma = getAuthPrisma();
   const eventKey = buildEventKey(payload);
   const eventType = payload.type ?? "unknown";
 
@@ -145,7 +200,7 @@ async function logPolarEvent(payload: PolarPayload) {
 }
 
 async function confirmPaidOrder(payload: PolarPayload) {
-  const prisma = getPrisma();
+  const prisma = getAuthPrisma();
   const metadata = payload.data?.metadata ?? {};
   const orderIdFromMetadata =
     typeof metadata.orderId === "string" ? metadata.orderId : undefined;
@@ -206,11 +261,5 @@ async function confirmPaidOrder(payload: PolarPayload) {
 }
 
 export function getAuth(): AuthInstance {
-  if (authInstance) {
-    return authInstance;
-  }
-
-  authInstance = createAuth();
-
-  return authInstance;
+  return getOrCreateAuth();
 }
