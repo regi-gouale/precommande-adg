@@ -1,21 +1,23 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-
-import { getAuth } from "@/lib/auth";
-import { MissingEnvironmentError } from "@/lib/env";
+import {
+  hasPreorderEnv,
+  MissingEnvironmentError,
+  missingPreorderEnvKeys,
+} from "@/lib/env";
 import { getPrisma } from "@/lib/prisma";
+import { createPreorderCheckoutSession } from "@/lib/stripe";
 
 const preorderSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  email: z.string().email(),
+  email: z.email(),
   phone: z.string().optional(),
   shippingAddress: z.string().optional(),
   quantity: z.coerce.number().int().min(1).max(100),
-  offerSlug: z.enum(["livre-seul", "livre-bonus", "pack-livres"]),
+  offerSlug: z.literal("livre-bonus"),
   cgvAccepted: z.literal("on"),
 });
 
@@ -35,12 +37,16 @@ export async function createPreorderCheckout(formData: FormData) {
     throw new Error("Formulaire invalide");
   }
 
+  if (!hasPreorderEnv) {
+    throw new Error(
+      `Configuration serveur incomplete: ${missingPreorderEnvKeys.join(", ")}`,
+    );
+  }
+
   let prisma: ReturnType<typeof getPrisma>;
-  let auth: ReturnType<typeof getAuth>;
 
   try {
     prisma = getPrisma();
-    auth = getAuth();
   } catch (error) {
     if (error instanceof MissingEnvironmentError) {
       throw new Error(
@@ -71,32 +77,34 @@ export async function createPreorderCheckout(formData: FormData) {
     data: {
       orderId: order.id,
       toStatus: "PENDING_PAYMENT",
-      note: "Commande creee avant paiement Polar",
+      note: "Commande creee avant paiement Stripe",
     },
   });
 
-  const checkoutSession = await auth.api.checkout({
-    headers: await headers(),
-    body: {
-      slug: parsed.data.offerSlug,
-      referenceId: order.id,
-      metadata: {
-        orderId: order.id,
-        referenceId: order.id,
-        offerSlug: parsed.data.offerSlug,
-        quantity: parsed.data.quantity,
-      },
-      successUrl: "/checkout/success?checkout_id={CHECKOUT_ID}",
-      returnUrl: "/#precommande",
-    },
+  const checkoutSession = await createPreorderCheckoutSession({
+    orderId: order.id,
+    firstName: parsed.data.firstName,
+    lastName: parsed.data.lastName,
+    email: parsed.data.email,
+    shippingAddress:
+      parsed.data.shippingAddress ?? "Retrait - Camp Impact Conférence",
+    offerSlug: parsed.data.offerSlug,
+    quantity: parsed.data.quantity,
   });
 
   await prisma.order.update({
     where: { id: order.id },
     data: {
       polarReferenceId: order.id,
+      polarCheckoutId: checkoutSession.id,
     },
   });
 
-  redirect(checkoutSession.url);
+  const checkoutUrl = checkoutSession.url;
+
+  if (!checkoutUrl) {
+    throw new Error("Stripe n'a pas retourne d'URL de checkout.");
+  }
+
+  redirect(checkoutUrl);
 }

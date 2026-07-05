@@ -1,6 +1,6 @@
-# Precommande ADG - Better Auth + Polar
+# Precommande ADG - Better Auth + Stripe
 
-Ce projet utilise exclusivement Better Auth pour l'authentification admin et le plugin officiel Polar pour le checkout, le customer portal et les webhooks.
+Ce projet utilise Better Auth pour l'authentification admin et le plugin officiel Stripe de Better Auth pour les événements de paiement. Le checkout de précommande passe par Stripe Checkout.
 
 ## Installation
 
@@ -19,13 +19,10 @@ NEXT_PUBLIC_APP_URL=
 BETTER_AUTH_SECRET=
 BETTER_AUTH_URL=
 
-POLAR_ACCESS_TOKEN=
-POLAR_WEBHOOK_SECRET=
-POLAR_ENVIRONMENT=sandbox
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 
-POLAR_PRODUCT_BOOK_SINGLE=
-POLAR_PRODUCT_BOOK_BONUS=
-POLAR_PRODUCT_BOOK_PACK=
+STRIPE_PRICE_BOOK_BONUS=
 
 EMAIL_FROM=
 RESEND_API_KEY=
@@ -44,21 +41,21 @@ La configuration inclut:
 - Session securisee (expiration + refresh + cache cookie).
 - Adaptateur Prisma PostgreSQL.
 
-## Configuration Polar (plugin officiel Better Auth)
+## Configuration Stripe (plugin officiel Better Auth)
 
-Le plugin `@polar-sh/better-auth` est configure dans `lib/auth.ts` avec:
+Le plugin `@better-auth/stripe` est configure dans `lib/auth.ts` avec:
 
-- `polar(...)`
-- `checkout(...)`
-- `portal(...)`
-- `webhooks(...)`
+- `stripe(...)`
+- `stripeClient`
+- `stripeWebhookSecret`
+- `onEvent(...)` pour confirmer les paiements Stripe
 
-Le client serveur Polar (`@polar-sh/sdk`) utilise:
+Le client serveur Stripe (`stripe`) est aussi utilise pour creer la session Stripe Checkout de precommande:
 
-- `POLAR_ACCESS_TOKEN`
-- `POLAR_ENVIRONMENT` (`sandbox` ou `production`)
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PRICE_BOOK_BONUS` (offre unique: livre + bonus)
 
-Le token Polar n'est jamais expose cote client.
+La cle secrète Stripe n'est jamais exposee cote client.
 
 ## Prisma
 
@@ -99,65 +96,59 @@ Ce script:
 1. Le visiteur ouvre `/preorder`.
 2. Il remplit prenom, nom, email, telephone optionnel, adresse, quantite, CGV.
 3. Le serveur cree une commande locale `PENDING_PAYMENT`.
-4. Le serveur declenche le checkout Polar via `auth.api.checkout` (plugin Better Auth + Polar).
-5. Le checkout est relie a la commande locale via `referenceId` et `metadata.orderId`.
-6. Paiement sur Polar.
-7. Le webhook `onOrderPaid` confirme le paiement.
+4. Le serveur cree une session Stripe Checkout avec `stripe.checkout.sessions.create`.
+5. La session est reliee a la commande locale via `metadata.orderId`.
+6. Paiement sur Stripe.
+7. Le webhook Stripe, traite par le plugin Better Auth, confirme le paiement.
 8. La commande locale passe a:
 	- `paymentStatus = PAID`
 	- `status = PREORDER_CONFIRMED`
 	- `paidAt = now`
-	- `polarOrderId`, `polarCheckoutId`
+	- identifiants de paiement Stripe stockes dans la commande
 9. Une entree `OrderStatusHistory` est creee.
 10. Email transactionnel de confirmation envoye.
 11. La commande est visible dans `/admin/orders`.
 
-Important: le checkout reste possible sans compte client (`authenticatedUsersOnly: false`).
+Important: le checkout reste possible sans compte client.
 
-## Webhook Polar
+## Webhook Stripe
 
-Endpoint géré par le plugin: `/polar/webhooks`.
+Le plugin Stripe de Better Auth recoit les evenements Stripe via le webhook configure dans Stripe Dashboard.
 
-Dans Polar:
-
-- configurez ce webhook vers `${BETTER_AUTH_URL}/api/auth/polar/webhooks`.
-- renseignez `POLAR_WEBHOOK_SECRET`.
-
-Le projet journalise tous les evenements Polar dans `PolarEventLog` (audit + idempotence) et traite `order.paid` pour confirmer la commande.
+Dans Stripe Dashboard, configurez le webhook avec `STRIPE_WEBHOOK_SECRET` puis laissez le callback `onEvent` de `lib/auth.ts` traiter `checkout.session.completed` et `payment_intent.succeeded`.
 
 ## Sandbox vs Production
 
-- `POLAR_ENVIRONMENT=sandbox` pour le test local.
-- `POLAR_ENVIRONMENT=production` en prod.
-- Les tokens, produits et webhooks sont separes entre sandbox et production.
+- Les cles de test et production Stripe sont separees.
+- Les price IDs Stripe sont separes entre environnements.
 
 ## Test checkout local
 
 1. Lancez l'app: `bun run dev`
 2. Ouvrez `/preorder` et remplissez le formulaire.
 3. Soumettez le formulaire
-4. Verifiez redirection checkout Polar
-5. Finalisez le paiement sandbox
+4. Verifiez la redirection vers Stripe Checkout
+5. Finalisez le paiement de test
 
 ## Test webhooks local
 
 1. Exposez votre app locale avec un tunnel HTTPS (ex: ngrok)
-2. Configurez l'URL webhook Polar
+2. Configurez le webhook Stripe vers le point de terminaison du plugin Better Auth
 3. Realisez un paiement test
 4. Verifiez dans la base:
 	- `Order.paymentStatus = PAID`
 	- `Order.status = PREORDER_CONFIRMED`
 	- `OrderStatusHistory`
-	- `PolarEventLog`
+	- evenement Stripe traite par Better Auth
 
 ## Deploiement
 
 Checklist:
 
 1. Variables d'environnement prod configurees.
-2. `POLAR_ENVIRONMENT=production`.
-3. Produits Polar production renseignes (`POLAR_PRODUCT_*`).
-4. Webhook prod configure vers `${BETTER_AUTH_URL}/api/auth/polar/webhooks`.
+2. `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET` configurees.
+4. Price ID Stripe production renseigne (`STRIPE_PRICE_BOOK_BONUS`).
+4. Webhook prod Stripe configure.
 5. Migration Prisma appliquee.
 6. Compte admin cree et teste.
 
@@ -169,13 +160,13 @@ Le projet couvre les criteres suivants:
 2. Connexion admin via Better Auth.
 3. Routes admin protegees.
 4. Role `ADMIN` verifie cote serveur.
-5. Plugin Polar Better Auth installe.
-6. Checkout Polar declenche via integration Better Auth + Polar.
+5. Plugin Stripe Better Auth installe.
+6. Checkout Stripe declenche via Stripe Checkout.
 7. Checkout invite possible.
 8. Chaque checkout relie a une commande locale via `referenceId`/metadata.
-9. Webhook Polar confirme les paiements.
+9. Webhook Stripe confirme les paiements.
 10. Une commande payee passe automatiquement `PREORDER_CONFIRMED`.
-11. Evenements Polar journalises pour eviter les doubles traitements.
+11. Evenements Stripe traites de facon idempotente.
 12. L'admin visualise les commandes et change les statuts.
 13. Email transactionnel envoye apres paiement confirme.
-14. README documente setup Better Auth + Polar complet.
+14. README documente setup Better Auth + Stripe complet.

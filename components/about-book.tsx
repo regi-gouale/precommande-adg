@@ -1,18 +1,13 @@
-import { IconCompass, IconFlame, IconShieldCheck } from "@tabler/icons-react";
-
 const pillars = [
   {
-    icon: IconCompass,
     title: "Un appel à se préparer",
     text: "Le grand drame n'est pas le manque de positions, mais des hommes et des femmes élevés sans préparation.",
   },
   {
-    icon: IconShieldCheck,
     title: "Une métamorphose intérieure",
     text: "La royauté selon Dieu n'est pas un privilège réservé à quelques-uns, mais une école où Dieu façonne ceux qu'Il appelle.",
   },
   {
-    icon: IconFlame,
     title: "Un impact concret",
     text: "Entreprise, politique, ministère, famille: ce volume pose des fondations solides pour diriger avec droiture dans toutes les sphères.",
   },
@@ -41,9 +36,6 @@ export function AboutBook() {
               key={p.title}
               className="rounded-2xl border border-border/60 bg-card p-8 transition-colors hover:border-gold/50"
             >
-              <span className="inline-flex rounded-xl border border-gold/40 bg-gold/10 p-3 text-gold">
-                <p.icon className="size-6" aria-hidden="true" />
-              </span>
               <h3 className="mt-5 font-serif text-xl font-semibold text-foreground">
                 {p.title}
               </h3>

@@ -5,12 +5,11 @@ const serverSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url(),
-  POLAR_ACCESS_TOKEN: z.string().min(1),
-  POLAR_WEBHOOK_SECRET: z.string().min(1),
-  POLAR_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
-  POLAR_PRODUCT_BOOK_SINGLE: z.string().min(1),
-  POLAR_PRODUCT_BOOK_BONUS: z.string().min(1),
-  POLAR_PRODUCT_BOOK_PACK: z.string().min(1),
+  STRIPE_SECRET_KEY: z.string().optional().default(""),
+  STRIPE_WEBHOOK_SECRET: z.string().optional().default(""),
+  STRIPE_PRICE_BOOK_SINGLE: z.string().optional().default(""),
+  STRIPE_PRICE_BOOK_BONUS: z.string().optional().default(""),
+  STRIPE_PRICE_BOOK_PACK: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default(""),
   RESEND_API_KEY: z.string().optional().default(""),
 });
@@ -54,15 +53,40 @@ export const env = parsedServerEnv.success
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "",
       BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? "",
       BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? "",
-      POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN ?? "",
-      POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET ?? "",
-      POLAR_ENVIRONMENT:
-        process.env.POLAR_ENVIRONMENT === "production"
-          ? "production"
-          : "sandbox",
-      POLAR_PRODUCT_BOOK_SINGLE: process.env.POLAR_PRODUCT_BOOK_SINGLE ?? "",
-      POLAR_PRODUCT_BOOK_BONUS: process.env.POLAR_PRODUCT_BOOK_BONUS ?? "",
-      POLAR_PRODUCT_BOOK_PACK: process.env.POLAR_PRODUCT_BOOK_PACK ?? "",
+      STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "",
+      STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+      STRIPE_PRICE_BOOK_SINGLE: process.env.STRIPE_PRICE_BOOK_SINGLE ?? "",
+      STRIPE_PRICE_BOOK_BONUS: process.env.STRIPE_PRICE_BOOK_BONUS ?? "",
+      STRIPE_PRICE_BOOK_PACK: process.env.STRIPE_PRICE_BOOK_PACK ?? "",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "",
       RESEND_API_KEY: process.env.RESEND_API_KEY ?? "",
     };
+
+function isMissing(value: string) {
+  return value.length === 0;
+}
+
+export const hasStripePluginEnv =
+  !isMissing(env.STRIPE_SECRET_KEY) && !isMissing(env.STRIPE_WEBHOOK_SECRET);
+
+export const hasStripeCheckoutEnv =
+  hasStripePluginEnv && !isMissing(env.STRIPE_PRICE_BOOK_BONUS);
+
+export const missingStripePluginEnvKeys = [
+  ...(isMissing(env.STRIPE_SECRET_KEY) ? ["STRIPE_SECRET_KEY"] : []),
+  ...(isMissing(env.STRIPE_WEBHOOK_SECRET) ? ["STRIPE_WEBHOOK_SECRET"] : []),
+];
+
+export const missingStripeCheckoutEnvKeys = [
+  ...(isMissing(env.STRIPE_SECRET_KEY) ? ["STRIPE_SECRET_KEY"] : []),
+  ...(isMissing(env.STRIPE_WEBHOOK_SECRET) ? ["STRIPE_WEBHOOK_SECRET"] : []),
+  ...(isMissing(env.STRIPE_PRICE_BOOK_BONUS)
+    ? ["STRIPE_PRICE_BOOK_BONUS"]
+    : []),
+];
+
+export const missingPreorderEnvKeys = Array.from(
+  new Set([...missingServerEnvKeys, ...missingStripeCheckoutEnvKeys]),
+);
+
+export const hasPreorderEnv = hasServerEnv && hasStripeCheckoutEnv;

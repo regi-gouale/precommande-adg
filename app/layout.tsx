@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [{ url: "/logo-editheos.png", type: "image/png" }],
+    shortcut: ["/logo-editheos.png"],
+    apple: [{ url: "/logo-editheos.png", type: "image/png" }],
+  },
+};
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 

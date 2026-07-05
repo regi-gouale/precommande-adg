@@ -5,7 +5,7 @@ import {
   IconShield,
 } from "@tabler/icons-react";
 import { createPreorderCheckout } from "@/app/actions/preorder";
-import { hasServerEnv, missingServerEnvKeys } from "@/lib/env";
+import { hasPreorderEnv, missingPreorderEnvKeys } from "@/lib/env";
 
 const perks = [
   "Votre exemplaire dédicacé par l'apôtre Yves CASTANOU",
@@ -13,7 +13,7 @@ const perks = [
 ];
 
 export function PreorderSection() {
-  const isCheckoutConfigured = hasServerEnv;
+  const isCheckoutConfigured = hasPreorderEnv;
 
   return (
     <section
@@ -77,7 +77,7 @@ export function PreorderSection() {
                   className="size-3.5 shrink-0 text-green-500"
                   aria-hidden="true"
                 />
-                Paiement 100 % sécurisé via Polar
+                Paiement 100 % sécurisé via Stripe
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <IconShield
@@ -94,7 +94,7 @@ export function PreorderSection() {
             {!isCheckoutConfigured ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 Configuration serveur incomplète. Variables manquantes:{" "}
-                {missingServerEnvKeys.join(", ")}
+                {missingPreorderEnvKeys.join(", ")}
               </p>
             ) : null}
 
@@ -176,19 +176,16 @@ export function PreorderSection() {
                   htmlFor="offerSlug"
                   className="text-xs font-medium text-muted-foreground"
                 >
-                  Offre *
+                  Offre
                 </label>
-                <select
+                <input
                   id="offerSlug"
                   className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none"
-                  name="offerSlug"
-                  required
+                  value="Livre + bonus"
+                  readOnly
                   disabled={!isCheckoutConfigured}
-                >
-                  <option value="livre-seul">Livre seul — 20 €</option>
-                  <option value="livre-bonus">Livre + bonus</option>
-                  <option value="pack-livres">Pack livres</option>
-                </select>
+                />
+                <input type="hidden" name="offerSlug" value="livre-bonus" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label
