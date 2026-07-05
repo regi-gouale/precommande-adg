@@ -35,14 +35,14 @@ export function getStripeClient() {
 
 export function getStripePriceIdForOffer(offerSlug: PreorderOfferSlug) {
   if (offerSlug !== "livre-bonus") {
-    throw new Error("Offre de precommande invalide.");
+    throw new Error("Offre de précommande invalide.");
   }
 
   const priceId = env.STRIPE_PRICE_BOOK_BONUS;
 
   if (!priceId.startsWith("price_")) {
     throw new Error(
-      "STRIPE_PRICE_BOOK_BONUS doit contenir un Price ID Stripe (prefixe price_), pas un Product ID (prod_).",
+      "STRIPE_PRICE_BOOK_BONUS doit contenir un Price ID Stripe (préfixe price_), pas un Product ID (prod_).",
     );
   }
 
@@ -264,4 +264,43 @@ export async function handleStripeEvent(event: Stripe.Event) {
     });
     throw error;
   }
+}
+
+export async function reconcilePaidCheckoutSession(checkoutSessionId: string) {
+  const stripeClient = getStripeClient();
+  const session = await stripeClient.checkout.sessions.retrieve(
+    checkoutSessionId,
+    {
+      expand: ["payment_intent"],
+    },
+  );
+
+  if (session.payment_status !== "paid") {
+    log.info("Session Stripe non payee, reconciliation ignoree", {
+      sessionId: checkoutSessionId,
+      status: session.status,
+      paymentStatus: session.payment_status,
+    });
+
+    return {
+      reconciled: false,
+      reason: "not_paid" as const,
+    };
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? session.id);
+
+  await confirmPaidOrderFromMetadata(
+    session.metadata,
+    paymentIntentId,
+    session.id,
+  );
+
+  return {
+    reconciled: true,
+    reason: "paid" as const,
+  };
 }
