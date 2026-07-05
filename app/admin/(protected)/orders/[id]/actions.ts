@@ -30,7 +30,9 @@ export async function updateOrderStatus(formData: FormData) {
     throw new Error("Donnees invalides");
   }
 
-  const order = await prisma.order.findUnique({ where: { id: parsed.data.orderId } });
+  const order = await prisma.order.findUnique({
+    where: { id: parsed.data.orderId },
+  });
 
   if (!order) {
     throw new Error("Commande introuvable");

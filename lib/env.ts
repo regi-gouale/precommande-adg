@@ -33,9 +33,7 @@ export class MissingEnvironmentError extends Error {
   readonly missingKeys: string[];
 
   constructor(missingKeys: string[]) {
-    super(
-      `Variables d'environnement manquantes: ${missingKeys.join(", ")}`,
-    );
+    super(`Variables d'environnement manquantes: ${missingKeys.join(", ")}`);
     this.name = "MissingEnvironmentError";
     this.missingKeys = missingKeys;
   }

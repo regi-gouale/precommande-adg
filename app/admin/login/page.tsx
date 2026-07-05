@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -99,8 +99,8 @@ export default function AdminLoginPage() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         {!authAvailable ? (
           <p className="text-sm text-amber-700">
-            Connexion indisponible: configurez les variables d&apos;environnement
-            serveur.
+            Connexion indisponible: configurez les variables
+            d&apos;environnement serveur.
           </p>
         ) : null}
 

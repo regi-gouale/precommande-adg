@@ -1,10 +1,10 @@
-import { Polar } from "@polar-sh/sdk";
 import { checkout, polar, portal, webhooks } from "@polar-sh/better-auth";
+import { Polar } from "@polar-sh/sdk";
+import { Prisma } from "@prisma/client";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
-import { Prisma } from "@prisma/client";
 
 import { sendPreorderConfirmationEmail } from "@/lib/email";
 import { requireServerEnv } from "@/lib/env";
