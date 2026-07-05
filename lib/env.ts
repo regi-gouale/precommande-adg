@@ -12,6 +12,8 @@ const serverSchema = z.object({
   STRIPE_PRICE_BOOK_PACK: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default(""),
   USESEND_API_KEY: z.string().optional().default(""),
+  ORDER_NOTIFICATION_EMAIL: z.string().optional().default("commandes@editheos.fr"),
+  FIRST_CHAPTER_PDF_PATH: z.string().optional().default(""),
 });
 
 const parsedServerEnv = serverSchema.safeParse(process.env);
@@ -60,6 +62,9 @@ export const env = parsedServerEnv.success
       STRIPE_PRICE_BOOK_PACK: process.env.STRIPE_PRICE_BOOK_PACK ?? "",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "",
       USESEND_API_KEY: process.env.USESEND_API_KEY ?? "",
+      ORDER_NOTIFICATION_EMAIL:
+        process.env.ORDER_NOTIFICATION_EMAIL ?? "commandes@editheos.fr",
+      FIRST_CHAPTER_PDF_PATH: process.env.FIRST_CHAPTER_PDF_PATH ?? "",
     };
 
 function isMissing(value: string) {

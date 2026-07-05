@@ -1,6 +1,7 @@
 "use client";
 
 import { IconLock } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/actions";
 
@@ -13,7 +14,8 @@ type PreorderFormProps = {
 function PreorderFormContent({
   isCheckoutConfigured,
   missingKeys,
-}: Omit<PreorderFormProps, "onSubmit">) {
+  isFormComplete,
+}: Omit<PreorderFormProps, "onSubmit"> & { isFormComplete: boolean }) {
   const { pending } = useFormStatus();
 
   return (
@@ -151,7 +153,11 @@ function PreorderFormContent({
       </label>
 
       <button
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-4 py-3.5 text-sm font-semibold text-gold-foreground shadow-lg shadow-gold/20 transition-all hover:bg-gold/90 disabled:opacity-50"
+        className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-all disabled:opacity-50 ${
+          isFormComplete
+            ? "bg-primary text-gold-foreground shadow-lg shadow-gold/20 hover:bg-gold/90"
+            : "bg-muted text-muted-foreground"
+        }`}
         type="submit"
         disabled={!isCheckoutConfigured || pending}
       >
@@ -171,11 +177,29 @@ export function PreorderForm({
   missingKeys,
   onSubmit,
 }: PreorderFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isFormComplete, setIsFormComplete] = useState(false);
+
+  const updateFormCompleteness = () => {
+    setIsFormComplete(formRef.current?.checkValidity() ?? false);
+  };
+
+  useEffect(() => {
+    setIsFormComplete(formRef.current?.checkValidity() ?? false);
+  }, []);
+
   return (
-    <form action={onSubmit} className="flex flex-col gap-4">
+    <form
+      ref={formRef}
+      action={onSubmit}
+      className="flex flex-col gap-4"
+      onInput={updateFormCompleteness}
+      onChange={updateFormCompleteness}
+    >
       <PreorderFormContent
         isCheckoutConfigured={isCheckoutConfigured}
         missingKeys={missingKeys}
+        isFormComplete={isFormComplete}
       />
     </form>
   );

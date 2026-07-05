@@ -26,6 +26,8 @@ STRIPE_PRICE_BOOK_BONUS=
 
 EMAIL_FROM=
 USESEND_API_KEY=
+ORDER_NOTIFICATION_EMAIL=commandes@editheos.fr
+FIRST_CHAPTER_PDF_PATH=public/premier-chapitre.pdf
 ```
 
 ## Configuration Better Auth

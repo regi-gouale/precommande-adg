@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { sendPreorderConfirmationEmail } from "@/lib/email";
+import { sendPaidOrderEmails } from "@/lib/email";
 import {
   env,
   hasStripeCheckoutEnv,
@@ -174,13 +174,15 @@ async function confirmPaidOrderFromMetadata(
       return;
     }
 
+    const paidAt = new Date();
+
     await prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: "PAID",
           status: "PREORDER_CONFIRMED",
-          paidAt: new Date(),
+          paidAt,
           polarOrderId: externalPaymentId,
           polarCheckoutId: checkoutSessionId ?? externalPaymentId,
         },
@@ -198,10 +200,20 @@ async function confirmPaidOrderFromMetadata(
 
     log.info("Commande confirmée après paiement", { orderId });
 
-    await sendPreorderConfirmationEmail({
-      to: order.email,
-      firstName: order.firstName,
+    await sendPaidOrderEmails({
       orderId: order.id,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      email: order.email,
+      phone: order.phone,
+      shippingAddress: order.shippingAddress,
+      quantity: order.quantity,
+      offerSlug: order.offerSlug,
+      amountCents: order.amountCents,
+      currency: order.currency,
+      paidAt,
+      paymentIntentId: externalPaymentId,
+      checkoutSessionId,
     });
   } catch (error) {
     log.error("Erreur lors de la confirmation du paiement", {
