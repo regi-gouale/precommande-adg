@@ -1,6 +1,5 @@
 import Stripe from "stripe";
 
-import { sendPaidOrderEmails } from "@/lib/email";
 import {
   env,
   hasStripeCheckoutEnv,
@@ -199,6 +198,8 @@ async function confirmPaidOrderFromMetadata(
     });
 
     log.info("Commande confirmée après paiement", { orderId });
+
+    const { sendPaidOrderEmails } = await import("@/lib/email");
 
     await sendPaidOrderEmails({
       orderId: order.id,

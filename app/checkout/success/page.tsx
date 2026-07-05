@@ -1,10 +1,25 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto flex min-h-[60svh] w-full max-w-2xl flex-col items-center justify-center gap-3 px-6 text-center">
+          <h1 className="text-3xl font-semibold">Paiement enregistré</h1>
+          <p className="text-muted-foreground">Chargement...</p>
+        </main>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
+  );
+}
+
+function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
