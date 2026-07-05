@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PREORDER_CONFIRMED
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  role          String    @default("USER")
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id            String    @id
+  expiresAt     DateTime
+  token         String    @unique
+  createdAt     DateTime
+  updatedAt     DateTime
+  ipAddress     String?
+  userAgent     String?
+  impersonatedBy String?
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                   String    @id
+  accountId            String
+  providerId           String
+  userId               String
+  accessToken          String?
+  refreshToken         String?
+  idToken              String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                String?
+  password             String?
+  createdAt            DateTime
+  updatedAt            DateTime
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@index([identifier])
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String
+  phone            String?
+  shippingAddress  String
+  quantity         Int
+  offerSlug        String
+  cgvAccepted      Boolean
+  status           OrderStatus     @default(PENDING_PAYMENT)
+  paymentStatus    PaymentStatus   @default(PENDING)
+  paidAt           DateTime?
+  polarOrderId     String?
+  polarCheckoutId  String?
+  polarReferenceId String?         @unique
+  amountCents      Int?
+  currency         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  statusHistory    OrderStatusHistory[]
+
+  @@index([email])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([polarCheckoutId])
+  @@index([polarOrderId])
+}
+
+model OrderStatusHistory {
+  id         String      @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  note       String?
+  createdAt  DateTime    @default(now())
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+model PolarEventLog {
+  id          String   @id @default(cuid())
+  eventKey    String   @unique
+  eventType   String
+  payloadJson String
+  processedAt DateTime @default(now())
+
+  @@index([eventType])
+}

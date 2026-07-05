@@ -1,19 +1,20 @@
-import { Button } from "@/components/ui/button";
-
 export default function Page() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
+    <main className="mx-auto flex min-h-[70svh] w-full max-w-2xl flex-col items-center justify-center gap-4 px-6 text-center">
+      <h1 className="text-4xl font-semibold">Precommande ADG</h1>
+      <p className="max-w-lg text-sm text-muted-foreground">
+        Lancez votre precommande et finalisez le paiement avec Polar en mode
+        invite.
+      </p>
+      <a
+        href="/precommande"
+        className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+      >
+        Aller au formulaire de precommande
+      </a>
+      <a href="/admin/login" className="text-sm underline">
+        Acces admin
+      </a>
+    </main>
   );
 }
