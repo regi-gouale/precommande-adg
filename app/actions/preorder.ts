@@ -120,7 +120,9 @@ export async function createPreorderCheckout(
   }
 
   // Création de la session Stripe
-  let checkoutSession: Awaited<ReturnType<typeof createPreorderCheckoutSession>>;
+  let checkoutSession: Awaited<
+    ReturnType<typeof createPreorderCheckoutSession>
+  >;
   try {
     checkoutSession = await createPreorderCheckoutSession({
       orderId: order.id,

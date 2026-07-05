@@ -12,7 +12,10 @@ const serverSchema = z.object({
   STRIPE_PRICE_BOOK_PACK: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default(""),
   USESEND_API_KEY: z.string().optional().default(""),
-  ORDER_NOTIFICATION_EMAIL: z.string().optional().default("commandes@editheos.fr"),
+  ORDER_NOTIFICATION_EMAIL: z
+    .string()
+    .optional()
+    .default("commandes@editheos.fr"),
   FIRST_CHAPTER_PDF_PATH: z.string().optional().default(""),
 });
 

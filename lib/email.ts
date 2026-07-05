@@ -42,7 +42,9 @@ async function getChapterAttachment(orderId: string) {
     return undefined;
   }
 
-  const filePath = isAbsolute(rawPath) ? rawPath : resolve(process.cwd(), rawPath);
+  const filePath = isAbsolute(rawPath)
+    ? rawPath
+    : resolve(process.cwd(), rawPath);
 
   try {
     const fileBuffer = await readFile(filePath);
