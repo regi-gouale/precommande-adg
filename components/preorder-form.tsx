@@ -1,7 +1,7 @@
 "use client";
 
 import { IconLock } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/actions";
 
@@ -15,7 +15,11 @@ function PreorderFormContent({
   isCheckoutConfigured,
   missingKeys,
   isFormComplete,
-}: Omit<PreorderFormProps, "onSubmit"> & { isFormComplete: boolean }) {
+  actionState,
+}: Omit<PreorderFormProps, "onSubmit"> & {
+  isFormComplete: boolean;
+  actionState: ActionResult | null;
+}) {
   const { pending } = useFormStatus();
 
   return (
@@ -24,6 +28,12 @@ function PreorderFormContent({
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
           Configuration serveur incomplète. Variables manquantes:{" "}
           {missingKeys.join(", ")}
+        </div>
+      ) : null}
+
+      {actionState?.success === false ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {actionState.error}
         </div>
       ) : null}
 
@@ -179,6 +189,10 @@ export function PreorderForm({
 }: PreorderFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [actionState, formAction] = useActionState<
+    ActionResult | null,
+    FormData
+  >(async (_previousState, formData) => onSubmit(formData), null);
 
   const updateFormCompleteness = () => {
     setIsFormComplete(formRef.current?.checkValidity() ?? false);
@@ -191,7 +205,7 @@ export function PreorderForm({
   return (
     <form
       ref={formRef}
-      action={onSubmit}
+      action={formAction}
       className="flex flex-col gap-4"
       onInput={updateFormCompleteness}
       onChange={updateFormCompleteness}
@@ -200,6 +214,7 @@ export function PreorderForm({
         isCheckoutConfigured={isCheckoutConfigured}
         missingKeys={missingKeys}
         isFormComplete={isFormComplete}
+        actionState={actionState}
       />
     </form>
   );
