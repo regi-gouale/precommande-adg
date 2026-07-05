@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, EB_Garamond } from "next/font/google";
+import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";

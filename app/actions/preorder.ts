@@ -57,7 +57,8 @@ export async function createPreorderCheckout(formData: FormData) {
       lastName: parsed.data.lastName,
       email: parsed.data.email,
       phone: parsed.data.phone,
-      shippingAddress: parsed.data.shippingAddress ?? "Retrait - Camp Impact Conférence",
+      shippingAddress:
+        parsed.data.shippingAddress ?? "Retrait - Camp Impact Conférence",
       quantity: parsed.data.quantity,
       offerSlug: parsed.data.offerSlug,
       cgvAccepted: true,
