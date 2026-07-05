@@ -1,11 +1,9 @@
-import { CrownEmblem } from "@/components/crown-emblem";
 import Image from "next/image";
 
 export function AuthorSection() {
   return (
     <section id="auteur" className="border-t border-border/60 py-20 md:py-28">
       <div className="mx-auto max-w-4xl px-6">
-        <CrownEmblem className="mx-auto" />
         <div className="mt-8 grid items-center gap-8 rounded-2xl border border-border/60 bg-card p-8 md:grid-cols-[220px_1fr]">
           <Image
             src="/image-presentation.jpeg"

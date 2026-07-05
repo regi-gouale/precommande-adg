@@ -23,9 +23,6 @@ export function AboutBook() {
     <section id="le-livre" className="border-t border-border/60 py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-gold">
-            Le pitch
-          </p>
           <h2 className="text-balance font-serif text-3xl font-semibold text-foreground sm:text-4xl">
             Vous sentez qu&apos;il y a plus...
           </h2>

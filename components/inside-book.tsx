@@ -17,9 +17,6 @@ export function InsideBook() {
     >
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2">
         <div>
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-gold">
-            Au sommaire
-          </p>
           <h2 className="text-balance font-serif text-3xl font-semibold text-foreground sm:text-4xl">
             Ce que vous découvrirez
           </h2>
