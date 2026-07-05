@@ -65,7 +65,7 @@ function createAuth() {
               },
             ],
             successUrl: "/checkout/success?checkout_id={CHECKOUT_ID}",
-            returnUrl: `${env.NEXT_PUBLIC_APP_URL}/precommande`,
+            returnUrl: `${env.NEXT_PUBLIC_APP_URL}/#precommande`,
             authenticatedUsersOnly: false,
           }),
           portal({

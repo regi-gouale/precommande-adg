@@ -14,9 +14,9 @@ export default function Page() {
       <Hero />
       <AboutBook />
       <InsideBook />
+      <PreorderSection />
       <AuthorSection />
       <Testimonials />
-      <PreorderSection />
       <SiteFooter />
     </main>
   );

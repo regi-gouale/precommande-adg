@@ -1,163 +1,146 @@
-"use client";
-
-import { IconCheck, IconCrown, IconLoader } from "@tabler/icons-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { IconCheck, IconCrown } from "@tabler/icons-react";
+import { createPreorderCheckout } from "@/app/actions/preorder";
+import { hasServerEnv, missingServerEnvKeys } from "@/lib/env";
 
 const perks = [
-  "Livraison prioritaire dès la sortie",
-  "Chapitre bonus exclusif en numérique",
-  "Tarif de précommande réduit",
-  "Dédicace numérique de l'auteur",
+  "Votre exemplaire dédicacé par l'apôtre Yves CASTANOU (exclusivité précommande)",
+  "Le chapitre 1 complet en PDF, offert immédiatement",
 ];
 
 export function PreorderSection() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
-  const [email, setEmail] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-    setStatus("loading");
-    setTimeout(() => setStatus("success"), 1200);
-  }
+  const isCheckoutConfigured = hasServerEnv;
 
   return (
     <section
       id="precommande"
-      className="border-t border-border/60 py-20 md:py-28"
+      className="border-t border-border/60 bg-card/40 py-20 md:py-28"
     >
-      <div className="mx-auto max-w-4xl px-6">
-        <div className="overflow-hidden rounded-3xl border border-gold/30 bg-card">
-          <div className="grid md:grid-cols-2">
-            {/* Left: perks */}
-            <div className="border-b border-border/60 p-8 md:border-b-0 md:border-r md:p-10">
-              <IconCrown className="size-8 text-gold" aria-hidden="true" />
-              <h2 className="mt-4 text-balance font-serif text-3xl font-semibold text-foreground">
-                Précommandez votre exemplaire
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                Réservez dès aujourd&apos;hui le Volume 1 et bénéficiez
-                d&apos;avantages exclusifs réservés aux premiers lecteurs.
-              </p>
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid gap-8 overflow-hidden rounded-3xl border border-gold/30 bg-card p-8 md:grid-cols-2 md:p-10">
+          <div>
+            <IconCrown className="size-8 text-gold" aria-hidden="true" />
+            <h2 className="mt-4 text-balance font-serif text-3xl font-semibold text-foreground">
+              Précommandez aujourd&apos;hui votre exemplaire dédicacé
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Offre valable jusqu&apos;au 07/07/2026. Les livres précommandés
+              sont à retirer à la Cité Royale pendant le Camp Impact Conférence.
+            </p>
 
-              <ul className="mt-6 flex flex-col gap-3">
-                {perks.map((perk) => (
-                  <li
-                    key={perk}
-                    className="flex items-center gap-3 text-sm text-foreground"
-                  >
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
-                      <IconCheck className="size-3.5" aria-hidden="true" />
-                    </span>
-                    <span>{perk}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-8 flex items-baseline gap-3">
-                <span className="font-serif text-4xl font-semibold text-gold">
-                  24,90 €
-                </span>
-                <span className="text-lg text-muted-foreground line-through">
-                  32,00 €
-                </span>
-              </div>
-            </div>
-
-            {/* Right: form */}
-            <div className="p-8 md:p-10">
-              {status === "success" ? (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <span className="flex size-14 items-center justify-center rounded-full bg-gold/15 text-gold">
-                    <IconCheck className="size-7" aria-hidden="true" />
+            <ul className="mt-8 flex flex-col gap-3">
+              {perks.map((perk) => (
+                <li
+                  key={perk}
+                  className="flex items-start gap-3 text-sm text-foreground"
+                >
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+                    <IconCheck className="size-3.5" aria-hidden="true" />
                   </span>
-                  <h3 className="mt-5 font-serif text-2xl font-semibold text-foreground">
-                    Précommande enregistrée !
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Merci. Vous recevrez un e-mail de confirmation à
-                    l&apos;adresse indiquée dès que le livre sera disponible.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="name"
-                      className="text-sm text-muted-foreground"
-                    >
-                      Nom complet
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      required
-                      placeholder="Jean Dupont"
-                      className="rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold focus:ring-1 focus:ring-gold"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="email"
-                      className="text-sm text-muted-foreground"
-                    >
-                      Adresse e-mail
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="jean@exemple.com"
-                      className="rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold focus:ring-1 focus:ring-gold"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="qty"
-                      className="text-sm text-muted-foreground"
-                    >
-                      Quantité
-                    </label>
-                    <select
-                      id="qty"
-                      className="rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold"
-                    >
-                      <option value="1">1 exemplaire</option>
-                      <option value="2">2 exemplaires</option>
-                      <option value="3">3 exemplaires</option>
-                      <option value="5">5 exemplaires</option>
-                    </select>
-                  </div>
+                  <span>{perk}</span>
+                </li>
+              ))}
+            </ul>
 
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={status === "loading"}
-                    className="mt-2 bg-gold text-base font-medium text-gold-foreground hover:bg-gold/90"
-                  >
-                    {status === "loading" ? (
-                      <>
-                        <IconLoader
-                          className="size-4 animate-spin"
-                          aria-hidden="true"
-                        />
-                        Traitement...
-                      </>
-                    ) : (
-                      "Confirmer ma précommande"
-                    )}
-                  </Button>
-                  <p className="text-center text-xs text-muted-foreground">
-                    Aucun prélèvement avant l&apos;expédition. Vous pouvez
-                    annuler à tout moment.
-                  </p>
-                </form>
-              )}
+            <div className="mt-8">
+              <span className="font-serif text-3xl font-semibold text-foreground">
+                20,00 €
+              </span>
             </div>
+
+            {!isCheckoutConfigured ? (
+              <p className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                Configuration serveur incomplète. Variables manquantes:{" "}
+                {missingServerEnvKeys.join(", ")}
+              </p>
+            ) : null}
           </div>
+
+          <form
+            action={createPreorderCheckout}
+            className="grid gap-4 rounded-2xl border border-border/60 bg-background/40 p-5"
+          >
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="firstName"
+                placeholder="Prénom"
+                required
+                disabled={!isCheckoutConfigured}
+              />
+              <input
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="lastName"
+                placeholder="Nom"
+                required
+                disabled={!isCheckoutConfigured}
+              />
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="email"
+                placeholder="Email"
+                type="email"
+                required
+                disabled={!isCheckoutConfigured}
+              />
+              <input
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="phone"
+                placeholder="Téléphone (optionnel)"
+                disabled={!isCheckoutConfigured}
+              />
+            </div>
+
+            <textarea
+              className="min-h-24 rounded-lg border border-border bg-background px-3 py-2"
+              name="shippingAddress"
+              placeholder="Adresse de livraison"
+              required
+              disabled={!isCheckoutConfigured}
+            />
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="offerSlug"
+                required
+                disabled={!isCheckoutConfigured}
+              >
+                <option value="livre-seul">Livre seul</option>
+                <option value="livre-bonus">Livre + bonus</option>
+                <option value="pack-livres">Pack livres</option>
+              </select>
+              <input
+                className="rounded-lg border border-border bg-background px-3 py-2"
+                name="quantity"
+                type="number"
+                min={1}
+                defaultValue={1}
+                required
+                disabled={!isCheckoutConfigured}
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                name="cgvAccepted"
+                type="checkbox"
+                required
+                disabled={!isCheckoutConfigured}
+              />
+              J&apos;accepte les CGV
+            </label>
+
+            <button
+              className="mt-2 rounded-lg bg-gold px-4 py-2 text-sm font-medium text-gold-foreground hover:bg-gold/90 disabled:opacity-50"
+              type="submit"
+              disabled={!isCheckoutConfigured}
+            >
+              Je précommande mon exemplaire dédicacé
+            </button>
+          </form>
         </div>
       </div>
     </section>

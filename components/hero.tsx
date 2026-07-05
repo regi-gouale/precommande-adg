@@ -1,5 +1,6 @@
 import { IconStar } from "@tabler/icons-react";
 import Image from "next/image";
+import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 export function Hero() {
@@ -19,25 +20,25 @@ export function Hero() {
         <div className="flex flex-col gap-6 text-center md:text-left">
           <span className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold md:mx-0">
             <IconStar className="size-3.5" aria-hidden="true" />
-            Précommande ouverte — Volume 1
+            Collection Royauté — Volume 1
           </span>
 
           <h1 className="text-balance font-serif text-4xl font-semibold leading-tight text-foreground sm:text-5xl md:text-6xl">
-            Impacter et Diriger en milieu hostile
+            Dieu ne choisit pas d&apos;abord les plus qualifiés. Il établit ceux
+            qu&apos;Il a préparés.
           </h1>
 
           <p className="text-pretty font-serif text-xl italic text-gold sm:text-2xl">
-            Comprendre la royauté selon Dieu
+            Ce livre vous équipe pour cette préparation.
           </p>
 
           <p className="mx-auto max-w-md text-pretty leading-relaxed text-muted-foreground md:mx-0">
-            Un manifeste spirituel pour ceux qui sont appelés à régner avec
-            sagesse, à demeurer intègres et à exercer une influence divine, même
-            au cœur de l&apos;adversité.
+            Collection « Royauté - Impacter et diriger en milieu hostile ».
+            Volume 1 : Comprendre la royauté selon Dieu.
           </p>
 
           <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row md:items-start">
-            <a
+            <Link
               href="#precommande"
               className={buttonVariants({
                 size: "lg",
@@ -45,13 +46,12 @@ export function Hero() {
                   "bg-gold px-8 text-base font-medium text-gold-foreground hover:bg-gold/90",
               })}
             >
-              Précommander maintenant
-            </a>
+              Je précommande
+            </Link>
             <div className="text-sm text-muted-foreground">
               <span className="font-serif text-2xl text-foreground">
-                24,90 €
+                20,00 €
               </span>
-              <span className="ml-2 line-through opacity-60">32,00 €</span>
             </div>
           </div>
         </div>
@@ -67,7 +67,7 @@ export function Hero() {
             width={520}
             height={680}
             priority
-            className="w-full max-w-sm drop-shadow-2xl"
+            className="w-full max-w-sm drop-shadow-2xl rounded-md"
           />
         </div>
       </div>

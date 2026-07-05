@@ -3,18 +3,18 @@ import { IconCompass, IconFlame, IconShieldCheck } from "@tabler/icons-react";
 const pillars = [
   {
     icon: IconCompass,
-    title: "Une vision royale",
-    text: "Découvrez ce que signifie véritablement régner selon le cœur de Dieu, au-delà des titres et des apparences.",
+    title: "Un appel à se préparer",
+    text: "Le grand drame n'est pas le manque de positions, mais des hommes et des femmes élevés sans préparation.",
   },
   {
     icon: IconShieldCheck,
-    title: "Tenir en milieu hostile",
-    text: "Des principes concrets pour rester debout, intègre et fructueux là où tout pousse au découragement.",
+    title: "Une métamorphose intérieure",
+    text: "La royauté selon Dieu n'est pas un privilège réservé à quelques-uns, mais une école où Dieu façonne ceux qu'Il appelle.",
   },
   {
     icon: IconFlame,
-    title: "Un impact durable",
-    text: "Apprenez à exercer une influence qui transforme les environnements et marque les générations.",
+    title: "Un impact concret",
+    text: "Entreprise, politique, ministère, famille: ce volume pose des fondations solides pour diriger avec droiture dans toutes les sphères.",
   },
 ];
 
@@ -24,16 +24,17 @@ export function AboutBook() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-gold">
-            À propos du livre
+            Le pitch
           </p>
           <h2 className="text-balance font-serif text-3xl font-semibold text-foreground sm:text-4xl">
-            Régner avec sagesse au cœur de l&apos;adversité
+            Vous sentez qu&apos;il y a plus...
           </h2>
           <p className="mt-5 text-pretty leading-relaxed text-muted-foreground">
-            Ce premier volume pose les fondations d&apos;une royauté selon Dieu.
-            Il s&apos;adresse aux leaders, aux serviteurs et à tous ceux qui
-            aspirent à diriger avec droiture dans des contextes difficiles, sans
-            renier leurs valeurs ni leur foi.
+            Peut-être avez-vous déjà été élevé à une position de responsabilité,
+            sans avoir été préparé à la porter. Peut-être aspirez-vous à
+            l&apos;influence, sans savoir pourquoi les portes ne s&apos;ouvrent
+            pas. Ce premier volume, issu de la Masterclass ROYAUTÉ, établit les
+            bases de la royauté selon Dieu pour vous préparer à diriger.
           </p>
         </div>
 

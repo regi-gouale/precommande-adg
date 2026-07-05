@@ -24,8 +24,8 @@ export function SiteFooter() {
           <a href="#precommande" className="transition-colors hover:text-gold">
             Précommander
           </a>
-          <a href="#contact" className="transition-colors hover:text-gold">
-            Contact
+          <a href="#faq" className="transition-colors hover:text-gold">
+            FAQ
           </a>
         </nav>
         <p className="text-xs text-muted-foreground/70">

@@ -6,8 +6,9 @@ import { buttonVariants } from "@/components/ui/button";
 const navItems = [
   { label: "Le livre", href: "#le-livre" },
   { label: "Au sommaire", href: "#sommaire" },
+  { label: "Précommande", href: "#precommande" },
   { label: "L'auteur", href: "#auteur" },
-  { label: "Témoignages", href: "#temoignages" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 export function SiteHeader() {

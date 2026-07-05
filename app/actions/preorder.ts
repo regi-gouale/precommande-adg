@@ -86,7 +86,7 @@ export async function createPreorderCheckout(formData: FormData) {
         quantity: parsed.data.quantity,
       },
       successUrl: "/checkout/success?checkout_id={CHECKOUT_ID}",
-      returnUrl: "/precommande",
+      returnUrl: "/#precommande",
     },
   });
 

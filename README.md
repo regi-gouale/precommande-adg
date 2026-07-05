@@ -96,7 +96,7 @@ Ce script:
 
 ## Flux precommande (invite)
 
-1. Le visiteur ouvre `/precommande`.
+1. Le visiteur ouvre `/preorder`.
 2. Il remplit prenom, nom, email, telephone optionnel, adresse, quantite, CGV.
 3. Le serveur cree une commande locale `PENDING_PAYMENT`.
 4. Le serveur declenche le checkout Polar via `auth.api.checkout` (plugin Better Auth + Polar).
@@ -134,7 +134,7 @@ Le projet journalise tous les evenements Polar dans `PolarEventLog` (audit + ide
 ## Test checkout local
 
 1. Lancez l'app: `bun run dev`
-2. Ouvrez `/precommande`
+2. Ouvrez `/preorder` et remplissez le formulaire.
 3. Soumettez le formulaire
 4. Verifiez redirection checkout Polar
 5. Finalisez le paiement sandbox
