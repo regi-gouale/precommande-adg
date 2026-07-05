@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { updateOrderStatus } from "@/app/admin/(protected)/orders/[id]/actions";
+import { formatDateTimeFull } from "@/lib/date";
 import { getPrisma } from "@/lib/prisma";
 
 export default async function AdminOrderDetailPage({
@@ -88,7 +89,7 @@ export default async function AdminOrderDetailPage({
                 {entry.fromStatus || "-"} {"->"} {entry.toStatus}
               </p>
               <p className="text-muted-foreground">
-                {entry.createdAt.toLocaleString()}
+                {formatDateTimeFull(entry.createdAt)}
               </p>
               <p className="text-muted-foreground">{entry.note || ""}</p>
             </li>

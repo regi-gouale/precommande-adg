@@ -2,6 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import { basename, isAbsolute, resolve } from "node:path";
 import { UseSend } from "usesend-js";
 
+import { formatDateTimeFull } from "@/lib/date";
 import { env } from "@/lib/env";
 import { log } from "@/lib/logger";
 
@@ -255,7 +256,7 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
     }
 
     const attachment = await getChapterAttachment(params.orderId);
-    const paidAtLabel = params.paidAt.toLocaleString("fr-FR");
+    const paidAtLabel = formatDateTimeFull(params.paidAt);
     const amountLabel =
       typeof params.amountCents === "number" && params.amountCents > 0
         ? `${(params.amountCents / 100).toFixed(2)} ${(params.currency ?? "EUR").toUpperCase()}`
