@@ -18,11 +18,13 @@ export default async function AdminDashboardPage() {
           <p className="text-2xl font-semibold">{totalOrders}</p>
         </article>
         <article className="rounded-xl border p-4">
-          <p className="text-sm text-muted-foreground">En attente paiement</p>
+          <p className="text-sm text-muted-foreground">
+            En attente de paiement
+          </p>
           <p className="text-2xl font-semibold">{pendingOrders}</p>
         </article>
         <article className="rounded-xl border p-4">
-          <p className="text-sm text-muted-foreground">Payees</p>
+          <p className="text-sm text-muted-foreground">Payées</p>
           <p className="text-2xl font-semibold">{paidOrders}</p>
         </article>
       </div>

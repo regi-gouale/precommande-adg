@@ -45,7 +45,8 @@ export default function AdminLoginPage() {
       <header className="space-y-2 text-center">
         <h1 className="text-3xl font-semibold">Connexion admin</h1>
         <p className="text-sm text-muted-foreground">
-          Authentification securisee via Better Auth
+          Authentification sécurisée — pour accéder à l&apos;interface
+          d&apos;administration
         </p>
       </header>
 
@@ -57,7 +58,7 @@ export default function AdminLoginPage() {
           setError(null);
 
           if (!authAvailable) {
-            setError("Configuration serveur incomplete");
+            setError("Configuration serveur incomplète");
             setPending(false);
             return;
           }
@@ -72,7 +73,7 @@ export default function AdminLoginPage() {
           });
 
           if (result.error) {
-            setError(result.error.message ?? "Echec de connexion");
+            setError(result.error.message ?? "Échec de connexion");
             setPending(false);
             return;
           }

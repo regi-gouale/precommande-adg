@@ -86,6 +86,19 @@ Ce script:
 - force le role `ADMIN`.
 - cree/met a jour le compte credential avec hash Better Auth.
 
+## Seed Prisma (admin par defaut)
+
+Pour initialiser un admin via Prisma seed:
+
+```bash
+bun run prisma:seed
+```
+
+Comportement:
+
+- si `ADMIN_EMAIL` et `ADMIN_PASSWORD` sont definis, ces valeurs sont utilisees.
+- sinon, seed cree `admin@local.test` avec le mot de passe `Admin12345!`.
+
 ## Protection admin
 
 - Login: `/admin/login`
