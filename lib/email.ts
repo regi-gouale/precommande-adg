@@ -167,7 +167,10 @@ async function sendUsesendEmail(payload: {
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
-      text: payload.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      text: payload.html
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
       attachments: payload.attachments,
     },
     {
@@ -281,7 +284,8 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
             </tr>
           </table>
         `,
-        footer: "Conservez cet email: il contient votre pièce jointe et votre référence de commande.",
+        footer:
+          "Conservez cet email: il contient votre pièce jointe et votre référence de commande.",
       }),
       attachments: attachment ? [attachment] : undefined,
       idempotencyKey: `paid-order-customer-${params.orderId}-${params.email.toLowerCase()}`,
