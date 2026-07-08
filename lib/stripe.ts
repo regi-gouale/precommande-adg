@@ -269,9 +269,7 @@ export async function handleStripeEvent(event: Stripe.Event) {
             ? session.amount_total
             : undefined,
         currency:
-          typeof session.currency === "string"
-            ? session.currency
-            : undefined,
+          typeof session.currency === "string" ? session.currency : undefined,
       };
 
       await confirmPaidOrderFromMetadata(
@@ -337,8 +335,11 @@ export async function reconcilePaidCheckoutSession(checkoutSessionId: string) {
         ? session.total_details.amount_tax
         : undefined,
     amountTotalCents:
-      typeof session.amount_total === "number" ? session.amount_total : undefined,
-    currency: typeof session.currency === "string" ? session.currency : undefined,
+      typeof session.amount_total === "number"
+        ? session.amount_total
+        : undefined,
+    currency:
+      typeof session.currency === "string" ? session.currency : undefined,
   };
 
   await confirmPaidOrderFromMetadata(

@@ -5,6 +5,7 @@ import { IconLock } from "@tabler/icons-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,8 +15,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import type { ActionResult } from "@/lib/actions";
-import { Input } from "./ui/input";
 
 const preorderSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -107,7 +108,7 @@ export function PreorderForm({
               <FormItem>
                 <FormLabel>Prénom *</FormLabel>
                 <FormControl>
-                  <input
+                  <Input
                     className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
                     placeholder="Jean"
                     disabled={!isCheckoutConfigured || pending}
@@ -125,7 +126,7 @@ export function PreorderForm({
               <FormItem>
                 <FormLabel>Nom *</FormLabel>
                 <FormControl>
-                  <input
+                  <Input
                     className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
                     placeholder="Dupont"
                     disabled={!isCheckoutConfigured || pending}
@@ -145,7 +146,7 @@ export function PreorderForm({
             <FormItem>
               <FormLabel>Adresse e-mail *</FormLabel>
               <FormControl>
-                <input
+                <Input
                   className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
                   placeholder="jean@exemple.fr"
                   type="email"
@@ -168,7 +169,7 @@ export function PreorderForm({
             <FormItem>
               <FormLabel>Téléphone (optionnel)</FormLabel>
               <FormControl>
-                <input
+                <Input
                   className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
                   placeholder="+33 6 12 34 56 78"
                   disabled={!isCheckoutConfigured || pending}
@@ -185,7 +186,7 @@ export function PreorderForm({
             <FormLabel className="text-xs font-medium text-muted-foreground">
               Offre
             </FormLabel>
-            <input
+            <Input
               className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
               value="Livre + bonus"
               readOnly
@@ -199,7 +200,7 @@ export function PreorderForm({
               <FormItem>
                 <FormLabel>Quantité *</FormLabel>
                 <FormControl>
-                  <input
+                  <Input
                     className="rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm transition-colors focus:border-gold focus:outline-none disabled:opacity-50 w-full"
                     type="number"
                     min={1}
@@ -258,7 +259,7 @@ export function PreorderForm({
           )}
         />
 
-        <button
+        <Button
           className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold transition-all disabled:opacity-50 ${
             isFormComplete
               ? "bg-primary text-gold-foreground shadow-lg shadow-gold/20 hover:bg-gold/90"
@@ -269,7 +270,7 @@ export function PreorderForm({
         >
           <IconLock className="size-4" aria-hidden="true" />
           {pending ? "Traitement..." : "Je précommande mon exemplaire dédicacé"}
-        </button>
+        </Button>
 
         <p className="text-center text-xs text-muted-foreground">
           Paiement sécurisé — Prix fixé à 20 €, aucune surprise

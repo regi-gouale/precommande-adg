@@ -1,7 +1,6 @@
 import { IconLock, IconStar } from "@tabler/icons-react";
 import Image from "next/image";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { PreorderButton } from "./preorder-button";
 
 export function Hero() {
   return (
@@ -16,7 +15,7 @@ export function Hero() {
         }}
       />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-[0.92fr_1.08fr] md:gap-16 md:py-28">
         <div className="flex flex-col gap-6 text-center md:text-left">
           <span className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold md:mx-0">
             <IconStar className="size-3.5" aria-hidden="true" />
@@ -38,16 +37,10 @@ export function Hero() {
           </p>
 
           <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row md:items-start">
-            <Link
-              href="#precommande"
-              className={buttonVariants({
-                size: "lg",
-                className:
-                  "bg-gold px-8 text-base font-semibold text-gold-foreground hover:bg-gold/90 shadow-lg shadow-gold/20",
-              })}
-            >
-              Je précommande — 20 €
-            </Link>
+            <PreorderButton
+              description="Je précommande — 20 €"
+              url="#precommande"
+            />
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 md:justify-start">
@@ -69,18 +62,18 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative flex justify-center">
+        <div className="relative flex justify-center md:justify-end">
           <div
             aria-hidden="true"
-            className="absolute inset-0 -z-10 mx-auto h-4/5 w-4/5 self-center rounded-full bg-gold/10 blur-3xl"
+            className="absolute inset-0 -z-10 mx-auto h-[88%] w-[88%] self-center rounded-full bg-gold/10 blur-3xl"
           />
           <Image
             src="/image-presentation.jpeg"
             alt="Couverture du livre Impacter et Diriger en milieu hostile, Volume 1"
-            width={520}
-            height={680}
+            width={640}
+            height={840}
             priority
-            className="w-full max-w-sm drop-shadow-2xl rounded-md"
+            className="w-full max-w-lg rounded-md drop-shadow-2xl md:max-w-xl"
           />
         </div>
       </div>

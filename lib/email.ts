@@ -50,7 +50,10 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-function formatMoney(cents: number | null | undefined, currency?: string | null) {
+function formatMoney(
+  cents: number | null | undefined,
+  currency?: string | null,
+) {
   if (typeof cents !== "number") {
     return undefined;
   }
@@ -299,10 +302,11 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
     const subtotalCents =
       typeof derivedSubtotalCents === "number"
         ? derivedSubtotalCents
-        : params.amountSubtotalCents ??
-          (typeof totalCents === "number" && typeof params.amountTaxCents === "number"
+        : (params.amountSubtotalCents ??
+          (typeof totalCents === "number" &&
+          typeof params.amountTaxCents === "number"
             ? totalCents - params.amountTaxCents
-            : undefined);
+            : undefined));
 
     const taxCents =
       typeof params.amountTaxCents === "number" && params.amountTaxCents > 0
