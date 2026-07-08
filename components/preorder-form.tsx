@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import type { ActionResult } from "@/lib/actions";
+import { Input } from "./ui/input";
 
 const preorderSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis"),
@@ -217,11 +218,11 @@ export function PreorderForm({
           name="cgvAccepted"
           render={({ field }) => (
             <FormItem>
-              <div className="flex items-start gap-2.5">
+              <div className="flex items-center gap-2.5">
                 <FormControl>
-                  <input
+                  <Input
                     type="checkbox"
-                    className="mt-0.5 size-4 accent-gold"
+                    className="mt-0.5 size-12 accent-gold"
                     disabled={!isCheckoutConfigured || pending}
                     checked={field.value}
                     onChange={field.onChange}
@@ -230,12 +231,27 @@ export function PreorderForm({
                     ref={field.ref}
                   />
                 </FormControl>
-                <span className="text-sm text-muted-foreground">
-                  J&apos;accepte les{" "}
-                  <span className="underline underline-offset-2">CGV</span> et
-                  confirme que je retirerai mon exemplaire à la Cité Royale lors
-                  du Camp Impact Conférence.
-                </span>
+                <div className="flex flex-col gap-2 text-justify">
+                  <span className="text-sm text-muted-foreground">
+                    J&apos;accepte les{" "}
+                    <span className="underline underline-offset-2">
+                      Conditions Générales de Vente
+                    </span>{" "}
+                    et confirme que je viendrai retirer mon exemplaire à
+                    l’adresse suivante : 27 rue des Vieilles Vignes, 77183
+                    Croissy-Beaubourg, au stand Impact Centre Chrétien — Stand
+                    25, lors du camp Impact Conférence.
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Je pourrai ainsi récupérer mon exemplaire dédicacé sur
+                    place. Le bonus me sera envoyé par e-mail après validation
+                    du paiement.
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Je comprends que si je ne me présente pas sur place, je ne
+                    pourrai pas récupérer mon exemplaire dédicacé.
+                  </span>
+                </div>
               </div>
               <FormMessage />
             </FormItem>

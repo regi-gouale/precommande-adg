@@ -84,7 +84,8 @@ export async function createPreorderCheckout(
         email: parsed.data.email,
         phone: parsed.data.phone,
         shippingAddress:
-          parsed.data.shippingAddress ?? "Retrait - Camp Impact Conférence",
+          parsed.data.shippingAddress ??
+          "27 rue des vieilles vignes 77183 croissy beaubourg - Stand Impact Centre Chretien Stand 25",
         quantity: parsed.data.quantity,
         offerSlug: parsed.data.offerSlug,
         cgvAccepted: true,
@@ -130,7 +131,8 @@ export async function createPreorderCheckout(
       lastName: parsed.data.lastName,
       email: parsed.data.email,
       shippingAddress:
-        parsed.data.shippingAddress ?? "Retrait - Camp Impact Conférence",
+        parsed.data.shippingAddress ??
+        "27 rue des vieilles vignes 77183 croissy beaubourg - Stand Impact Centre Chretien Stand 25",
       offerSlug: parsed.data.offerSlug,
       quantity: parsed.data.quantity,
     });
