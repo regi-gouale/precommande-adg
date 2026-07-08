@@ -2,6 +2,7 @@
 
 import { IconFlame } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { PreorderButton } from "@/components/preorder-button";
 
 const DEADLINE = new Date("2026-07-07T19:00:00+02:00");
 
@@ -50,12 +51,11 @@ export function CountdownBanner() {
         <span className="hidden text-muted-foreground sm:inline">
           Exemplaire dédicacé + chapitre 1 offert
         </span>
-        <a
-          href="#precommande"
-          className="ml-1 font-semibold text-gold underline underline-offset-2 hover:text-gold/80"
-        >
-          Je précommande →
-        </a>
+        <PreorderButton
+          description="Je précommande maintenant"
+          url="#precommande"
+          isIconAdded
+        />
       </p>
     </div>
   );

@@ -1,9 +1,9 @@
 "use client";
 
 import { IconCrown } from "@tabler/icons-react";
-import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PreorderButton } from "./preorder-button";
 
 const navItems = [

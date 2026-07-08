@@ -1,5 +1,5 @@
-import { IconArrowRight, IconBookmark } from "@tabler/icons-react";
-import { buttonVariants } from "@/components/ui/button";
+import { IconBookmark } from "@tabler/icons-react";
+import { PreorderButton } from "@/components/preorder-button";
 
 const faqItems = [
   {
@@ -56,17 +56,11 @@ export function Testimonials() {
                 Offre valable jusqu&apos;au 07/07/2026 uniquement.
               </strong>
             </p>
-            <a
-              href="#precommande"
-              className={buttonVariants({
-                size: "lg",
-                className:
-                  "mt-6 bg-gold px-8 text-base font-semibold text-gold-foreground shadow-lg shadow-gold/20 hover:bg-gold/90",
-              })}
-            >
-              Je précommande maintenant
-              <IconArrowRight className="ml-2 size-4" aria-hidden="true" />
-            </a>
+            <PreorderButton
+              description="Je précommande maintenant"
+              url="#precommande"
+              isIconAdded
+            />
           </div>
         </div>
 

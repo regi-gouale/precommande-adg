@@ -1,6 +1,6 @@
 import { IconLock, IconStar } from "@tabler/icons-react";
 import Image from "next/image";
-import { PreorderButton } from "./preorder-button";
+import { PreorderButton } from "@/components/preorder-button";
 
 export function Hero() {
   return (
