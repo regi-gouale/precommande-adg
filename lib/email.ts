@@ -22,6 +22,9 @@ type PaidOrderEmailParams = {
   quantity: number;
   offerSlug: string;
   amountCents?: number | null;
+  amountSubtotalCents?: number | null;
+  amountTaxCents?: number | null;
+  amountTotalCents?: number | null;
   currency?: string | null;
   paidAt: Date;
   paymentIntentId: string;
@@ -34,6 +37,7 @@ type EmailAttachment = {
 };
 
 const BOOK_TITLE = "Royauté";
+const BOOK_VAT_RATE = 0.055;
 
 const usesend = new UseSend(env.USESEND_API_KEY);
 
@@ -44,6 +48,20 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function formatMoney(cents: number | null | undefined, currency?: string | null) {
+  if (typeof cents !== "number") {
+    return undefined;
+  }
+
+  const currencyCode = (currency ?? "EUR").toUpperCase();
+
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: currencyCode,
+    minimumFractionDigits: 2,
+  }).format(cents / 100);
 }
 
 function createEmailLayout(params: {
@@ -260,10 +278,42 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
 
     const attachment = await getChapterAttachment(params.orderId);
     const paidAtLabel = formatDateTimeFull(params.paidAt);
-    const amountLabel =
-      typeof params.amountCents === "number" && params.amountCents > 0
-        ? `${(params.amountCents / 100).toFixed(2)} ${(params.currency ?? "EUR").toUpperCase()}`
-        : "N/A";
+
+    const totalCents =
+      params.amountTotalCents ??
+      params.amountCents ??
+      (typeof params.amountSubtotalCents === "number" &&
+      typeof params.amountTaxCents === "number"
+        ? params.amountSubtotalCents + params.amountTaxCents
+        : undefined);
+
+    // Stripe peut ne pas renvoyer le detail de taxe: on derive alors une TVA livre de 5,5% depuis le TTC.
+    const shouldDeriveTaxFromReducedRate =
+      typeof totalCents === "number" &&
+      (typeof params.amountTaxCents !== "number" || params.amountTaxCents <= 0);
+
+    const derivedSubtotalCents = shouldDeriveTaxFromReducedRate
+      ? Math.round(totalCents / (1 + BOOK_VAT_RATE))
+      : undefined;
+
+    const subtotalCents =
+      typeof derivedSubtotalCents === "number"
+        ? derivedSubtotalCents
+        : params.amountSubtotalCents ??
+          (typeof totalCents === "number" && typeof params.amountTaxCents === "number"
+            ? totalCents - params.amountTaxCents
+            : undefined);
+
+    const taxCents =
+      typeof params.amountTaxCents === "number" && params.amountTaxCents > 0
+        ? params.amountTaxCents
+        : typeof totalCents === "number" && typeof subtotalCents === "number"
+          ? totalCents - subtotalCents
+          : undefined;
+
+    const amountLabel = formatMoney(totalCents, params.currency) ?? "N/A";
+    const subtotalLabel = formatMoney(subtotalCents, params.currency) ?? "N/A";
+    const taxLabel = formatMoney(taxCents, params.currency) ?? "N/A";
 
     await sendUsesendEmail({
       to: params.email,
@@ -280,8 +330,14 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
               <td style="padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;"><strong>Référence commande:</strong> ${escapeHtml(params.orderId)}</td>
             </tr>
             <tr>
-              <td style="padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;"><strong>Montant:</strong> ${escapeHtml(amountLabel)}</td>
+              <td style="padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;"><strong>Total TTC:</strong> ${escapeHtml(amountLabel)}</td>
             </tr>
+          </table>
+          <p style="margin:18px 0 8px 0;"><strong>Détail de la facture</strong></p>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Sous-total HT</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(subtotalLabel)}</td></tr>
+            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Taxes (TVA)</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(taxLabel)}</td></tr>
+            <tr><td style="padding:10px 14px;background:#f9fafb;"><strong>Total TTC</strong></td><td style="padding:10px 14px;"><strong>${escapeHtml(amountLabel)}</strong></td></tr>
           </table>
         `,
         footer:
@@ -309,7 +365,9 @@ export async function sendPaidOrderEmails(params: PaidOrderEmailParams) {
             <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Adresse</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(params.shippingAddress)}</td></tr>
             <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Offre</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(params.offerSlug)}</td></tr>
             <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Quantite</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${String(params.quantity)}</td></tr>
-            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Montant</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(amountLabel)}</td></tr>
+            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Sous-total HT</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(subtotalLabel)}</td></tr>
+            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Taxes (TVA)</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(taxLabel)}</td></tr>
+            <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>Total TTC</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(amountLabel)}</td></tr>
             <tr><td style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;"><strong>PaymentIntent Stripe</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">${escapeHtml(params.paymentIntentId)}</td></tr>
             <tr><td style="padding:10px 14px;background:#f9fafb;"><strong>Checkout Session Stripe</strong></td><td style="padding:10px 14px;">${escapeHtml(params.checkoutSessionId ?? "-")}</td></tr>
           </table>

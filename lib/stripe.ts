@@ -141,6 +141,13 @@ export async function createPreorderCheckoutSession(input: {
 
 type StripeMetadata = Record<string, string> | null | undefined;
 
+type StripeInvoiceAmounts = {
+  amountSubtotalCents?: number;
+  amountTaxCents?: number;
+  amountTotalCents?: number;
+  currency?: string;
+};
+
 function getMetadataOrderId(metadata: StripeMetadata) {
   return typeof metadata?.orderId === "string" ? metadata.orderId : undefined;
 }
@@ -149,6 +156,7 @@ async function confirmPaidOrderFromMetadata(
   metadata: StripeMetadata,
   externalPaymentId: string,
   checkoutSessionId?: string,
+  invoiceAmounts?: StripeInvoiceAmounts,
 ) {
   try {
     const orderId = getMetadataOrderId(metadata);
@@ -184,6 +192,8 @@ async function confirmPaidOrderFromMetadata(
           paidAt,
           polarOrderId: externalPaymentId,
           polarCheckoutId: checkoutSessionId ?? externalPaymentId,
+          amountCents: invoiceAmounts?.amountTotalCents ?? order.amountCents,
+          currency: invoiceAmounts?.currency ?? order.currency,
         },
       });
 
@@ -212,6 +222,9 @@ async function confirmPaidOrderFromMetadata(
       offerSlug: order.offerSlug,
       amountCents: order.amountCents,
       currency: order.currency,
+      amountSubtotalCents: invoiceAmounts?.amountSubtotalCents,
+      amountTaxCents: invoiceAmounts?.amountTaxCents,
+      amountTotalCents: invoiceAmounts?.amountTotalCents,
       paidAt,
       paymentIntentId: externalPaymentId,
       checkoutSessionId,
@@ -242,10 +255,30 @@ export async function handleStripeEvent(event: Stripe.Event) {
           ? session.payment_intent
           : (session.payment_intent?.id ?? event.id);
 
+      const invoiceAmounts: StripeInvoiceAmounts = {
+        amountSubtotalCents:
+          typeof session.amount_subtotal === "number"
+            ? session.amount_subtotal
+            : undefined,
+        amountTaxCents:
+          typeof session.total_details?.amount_tax === "number"
+            ? session.total_details.amount_tax
+            : undefined,
+        amountTotalCents:
+          typeof session.amount_total === "number"
+            ? session.amount_total
+            : undefined,
+        currency:
+          typeof session.currency === "string"
+            ? session.currency
+            : undefined,
+      };
+
       await confirmPaidOrderFromMetadata(
         session.metadata,
         paymentIntentId,
         session.id,
+        invoiceAmounts,
       );
       return;
     }
@@ -294,10 +327,25 @@ export async function reconcilePaidCheckoutSession(checkoutSessionId: string) {
       ? session.payment_intent
       : (session.payment_intent?.id ?? session.id);
 
+  const invoiceAmounts: StripeInvoiceAmounts = {
+    amountSubtotalCents:
+      typeof session.amount_subtotal === "number"
+        ? session.amount_subtotal
+        : undefined,
+    amountTaxCents:
+      typeof session.total_details?.amount_tax === "number"
+        ? session.total_details.amount_tax
+        : undefined,
+    amountTotalCents:
+      typeof session.amount_total === "number" ? session.amount_total : undefined,
+    currency: typeof session.currency === "string" ? session.currency : undefined,
+  };
+
   await confirmPaidOrderFromMetadata(
     session.metadata,
     paymentIntentId,
     session.id,
+    invoiceAmounts,
   );
 
   return {
