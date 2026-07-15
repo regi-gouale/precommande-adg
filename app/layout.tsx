@@ -47,7 +47,7 @@ export default function RootLayout({
       <head>
         <script
           defer
-          src="https://analytics.gouale.com/script.js"
+          src="https://analytics.gouale.com/recorder.js"
           data-website-id="a90ec6d4-cbd1-4ec1-a9c4-d8255bce9a31"
           data-domains="network.editheos.fr"
         />
